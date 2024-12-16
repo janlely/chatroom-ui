@@ -51,11 +51,12 @@
 }
 
 .message-container {
+  margin-top: 10px;
 }
 
 .message-box-left {
-    border: 2px solid black;
-    background-color: lightgreen;
+    justify-content: flex-start;
+    display: flex;
 }
 
 .message-box-right {

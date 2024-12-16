@@ -5,23 +5,27 @@ import "./Chat.css"
 
 function Chat() {
 
+  const connectionRef = useRef(false);
   const roomId = window.location.search.substring(1)
   const editorRef = useRef<HTMLDivElement>(null)
   const [ws, setWs] = useState<WebSocket | null>(null)
   const [messages, setMessages] = useState<MessageDivData[]>([])
-  const sendMessage = () => {
-    const message: MessageDivData = {
-        message: {
-            messageId: Date.now(),
-            type: MessageType.TEXT,
-            data: editorRef.current!.innerText
-        },
-        send: true,
-        success: false
-    }
-    axios.post("/api/chat/message", message.message, {
+  const pullMessage = () => {
+    axios.post("/api/chat/pull", {
+        uuid: messages[messages.length - 1].uuid
+    }, {
         headers: {
-            "Room-Id": roomId
+            "RoomId": roomId
+        }
+    }).then(res => {
+        const receivedMessages = res.data as MessageDivData[]
+        setMessages([...messages,...receivedMessages])
+    })
+  }
+  const doSendMessage = (message: MessageDivData) => {
+    axios.post("/api/chat/send", message.message, {
+        headers: {
+            "RoomId": roomId
         }
     }).then(res => {
         console.log(`response status: ${res.status}`)
@@ -29,11 +33,28 @@ function Chat() {
             window.location.href = "/Login"
             return
         }
-        message.success = true
-        setMessages(messages)
+        setMessages(prevMessages =>
+            prevMessages.map(msg =>
+                msg.message.messageId === message.message.messageId
+                    ? { ...msg, success: true, uuid: res.data.uuid }
+                    : msg
+            )
+        );
     })
-    messages.push(message)
-    setMessages(messages)
+  }
+  const sendMessage = () => {
+    const message: MessageDivData = {
+        message: {
+            messageId: Date.now(),
+            type: MessageType.TEXT,
+            data: editorRef.current!.innerText,
+        },
+        send: true,
+        success: false,
+        uuid: 0
+    }
+    doSendMessage(message)
+    setMessages([...messages, message])
   }
   const handlerKeyDown = (e: any) => {
     const editor = editorRef.current!
@@ -54,60 +75,58 @@ function Chat() {
     if (e.key === "Enter") {
         console.log("enter")
         e.preventDefault()
-        // const text = editor.innerHTML
-        // ws?.send(text)
-        // console.log("send message: ", text)
         sendMessage()
         editor.innerHTML = ""
         return
     }
   }
-  const setCursorAtStart = (element: HTMLDivElement) => {
-    var range = document.createRange()
-    var sel = window.getSelection()
-    
-    range.setStart(element.childNodes[2], 5)
-    range.collapse(true)
-    
-    sel?.removeAllRanges()
-    sel?.addRange(range)
-  };
 
   const handlerPaste = (e: any) => {
     console.log("paste")
   }
 
-  useEffect(() => {
-    const editor = editorRef.current
-    if (editor?.focus()) {
-        setCursorAtStart(editor)
-    }
-    const wsClient = new WebSocket(`/chat-ws?${roomId}`)
+  const connect = () => {
+    const wsClient = new WebSocket(`/chat-ws?${roomId}`);
+  
     wsClient.onopen = () => {
-        console.log("connected")
-    }
+      console.log("WebSocket connected");
+      connectionRef.current = true;
+    };
+  
     wsClient.onclose = (e) => {
-        console.log(`disconnected, code is: ${e.code}`)
-        if (e.code === 3401) {
-            window.location.href = "/Login"
-        }
-    }
+      console.log(`WebSocket disconnected, code: ${e.code}`);
+      if (e.code === 3401) {
+        window.location.href = "/Login";
+      } else {
+        setTimeout(connect, 1000);
+      }
+    };
+  
     wsClient.onmessage = (e) => {
-        if (e.data === "notify") {
-            console.log("need to pull messages")
-            return 
-        }
-        if (e.data === "pong") {
-            console.log("pong")
-        }
+      if (e.data === "notify") {
+        console.log("Received notification, pulling messages...");
+        pullMessage();
+      } else if (e.data === "pong") {
+        console.log("Received pong");
+      }
+    };
+  
+    setWs(wsClient);
+  };
+  useEffect(() => {
+    if (connectionRef.current) {
+        return
     }
-    setWs(wsClient)
-  }, [])
+    console.log("should execute once")
+    connect()
+    connectionRef.current = true
+  })
+
   return (
     <div>
         <div className="chat-body">
               {messages.map(msg => (
-                  <div className="message-container">
+                  <div className="message-container" key={msg.message.messageId}>
                       {msg.send ? (
                         <div className="message-box-right">
                             {!msg.success && (

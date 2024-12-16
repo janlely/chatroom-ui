@@ -13,4 +13,5 @@ export interface MessageDivData {
     message: Message
     send: boolean
     success: boolean
+    uuid: number
 }
