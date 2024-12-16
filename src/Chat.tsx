@@ -79,11 +79,11 @@ function Chat() {
             return
         }
         setMessages(prevMessages =>
-            prevMessages.map(msg =>
+            uniqueByProperty(prevMessages.map(msg =>
                 msg.message.messageId === message.message.messageId
                     ? { ...msg, success: true, uuid: res.data.uuid }
                     : msg
-            )
+            ))
         );
     })
   }
@@ -106,7 +106,7 @@ function Chat() {
     }
     doSendMessage(message)
     setScrollToBottomNeeded(true)
-    setMessages([...messages, message])
+    setMessages(uniqueByProperty([...messages, message]))
   }
 
   const handlerKeyDown = (e: any) => {
@@ -189,6 +189,20 @@ function Chat() {
 
   const scrollToBottom = (element: HTMLDivElement) => {
     element.scrollTop = element.scrollHeight - element.clientHeight;
+  }
+
+
+  const uniqueByProperty = (items: any[]): any[] => {
+      const seen = new Set();
+      return items.filter(item => {
+          const propValue = item.uuid;
+          if (seen.has(propValue)) {
+              return false;
+          } else {
+              seen.add(propValue);
+              return true;
+          }
+      });
   }
 
   return (
