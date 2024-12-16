@@ -1,27 +1,72 @@
 import { useEffect, useRef, useState } from "react";
 import axios from 'axios';
-import {MessageType, MessageDivData} from "./common"
+import {MessageType, MessageDivData, Memeber} from "./common"
 import "./Chat.css"
+import Message from "./Message"
 
 function Chat() {
 
-  const connectionRef = useRef(false);
   const roomId = window.location.search.substring(1)
   const editorRef = useRef<HTMLDivElement>(null)
-  const [ws, setWs] = useState<WebSocket | null>(null)
+  const msgDivRef = useRef<HTMLDivElement>(null)
   const [messages, setMessages] = useState<MessageDivData[]>([])
-  const pullMessage = () => {
+  const [members, setMembers] = useState<Memeber[]>([])
+  const messagesRef = useRef<MessageDivData[]>([])
+  const [scrollToBottomNeeded, setScrollToBottomNeeded] = useState(false);
+  const connectionInited = useRef(false)
+
+  useEffect(() => {
+    messagesRef.current = messages
+    if (scrollToBottomNeeded) {
+        setScrollToBottomNeeded(false)
+        scrollToBottom(msgDivRef.current!)
+    }
+    console.log(`message size: ${messages.length}, div size: ${msgDivRef.current?.childElementCount}`)
+  }, [messages])
+
+  const refreshMembers = () => {
+    axios.get("/api/chat/members", {
+        headers: {
+            "RoomId": roomId
+        }
+    }).then(res => {
+        setMembers(res.data)
+    })
+  }
+
+  const findLastUuid = (msgs: MessageDivData[]) => {
+    for (let i = msgs.length - 1; i >= 0; i--) {
+        if (msgs[i].message.sender !== "me") {
+            return msgs[i].uuid
+        }
+    }
+    return 0
+  }
+
+  const pullMessage = (direction: string) => {
+    const isAtBottom = isScrollbarAtBottom(editorRef.current!)
+    const uuid = direction === "before" ?
+        (messagesRef.current[0]?.uuid ?? 0) :
+        findLastUuid(messagesRef.current)
     axios.post("/api/chat/pull", {
-        uuid: messages[messages.length - 1].uuid
+        uuid: uuid,
+        direction: direction
     }, {
         headers: {
             "RoomId": roomId
         }
     }).then(res => {
         const receivedMessages = res.data as MessageDivData[]
-        setMessages([...messages,...receivedMessages])
+        setMessages(
+            direction == "before" ? [...receivedMessages, ...messagesRef.current] : [...messagesRef.current, ...receivedMessages]
+        )
+        if (isAtBottom) {
+            console.log("need to set scroll to bottom")
+            setScrollToBottomNeeded(true)
+        }
     })
   }
+
   const doSendMessage = (message: MessageDivData) => {
     axios.post("/api/chat/send", message.message, {
         headers: {
@@ -42,20 +87,28 @@ function Chat() {
         );
     })
   }
+
   const sendMessage = () => {
+    const content = editorRef.current!.innerText
+    if (!content || content === "") {
+        return
+    }
     const message: MessageDivData = {
         message: {
             messageId: Date.now(),
             type: MessageType.TEXT,
             data: editorRef.current!.innerText,
+            sender: "me"
         },
         send: true,
         success: false,
         uuid: 0
     }
     doSendMessage(message)
+    setScrollToBottomNeeded(true)
     setMessages([...messages, message])
   }
+
   const handlerKeyDown = (e: any) => {
     const editor = editorRef.current!
     if (e.key === 'Enter' && e.shiftKey) {
@@ -90,7 +143,7 @@ function Chat() {
   
     wsClient.onopen = () => {
       console.log("WebSocket connected");
-      connectionRef.current = true;
+      refreshMembers()
     };
   
     wsClient.onclose = (e) => {
@@ -105,52 +158,82 @@ function Chat() {
     wsClient.onmessage = (e) => {
       if (e.data === "notify") {
         console.log("Received notification, pulling messages...");
-        pullMessage();
+        pullMessage("after");
+      } else if (e.data === "members") {
+        refreshMembers()
       } else if (e.data === "pong") {
         console.log("Received pong");
       }
     };
-  
-    setWs(wsClient);
-  };
+    return wsClient
+  }
+
   useEffect(() => {
-    if (connectionRef.current) {
+
+    if (connectionInited.current) {
         return
     }
     console.log("should execute once")
-    connect()
-    connectionRef.current = true
+    const wsClient = connect()
+    connectionInited.current = true
+    pullMessage("before")
+    return () => {
+        console.log("关闭连接")
+        wsClient.close()
+    }
   })
 
+  const isScrollbarAtBottom = (element: HTMLDivElement) => {
+      return element.scrollTop + element.clientHeight >= element.scrollHeight;
+  }
+
+  const scrollToBottom = (element: HTMLDivElement) => {
+    element.scrollTop = element.scrollHeight - element.clientHeight;
+  }
+
   return (
-    <div>
-        <div className="chat-body">
-              {messages.map(msg => (
-                  <div className="message-container" key={msg.message.messageId}>
-                      {msg.send ? (
-                        <div className="message-box-right">
-                            {!msg.success && (
-                                <div className="loading-container">
-                                    <div className="spinner"></div>
-                                </div>
-                            )}
-                            <div className="message-content">{msg.message.data}</div>
-                        </div>
-                      ) : (
-                        <div className="message-box-left">
-                            {msg.message.data}
-                        </div>
-                      )}
-                  </div>
-              ))}
+    <div className="parent">
+        <div className="room-members-container">
+            {members.map(member => (
+                <div className="room-member" key={member.username}>
+                    {member.avatar && <div>{member.avatar}</div>}
+                    <div>{member.username}</div>
+                </div>
+            ))}
         </div>
-        <div
-            ref={editorRef}
-            className="chat-input"
-            contentEditable="true"
-            onPaste={handlerPaste}
-            onKeyDown={handlerKeyDown}
-        >
+        <div className="chat-place">
+            <div className="chat-body" ref={msgDivRef}>
+                {messages.map(msg => (
+                    <div className="message-container" key={msg.message.messageId}>
+                        {msg.send ? (
+                            <div className="message-box-right">
+                                {!msg.success && (
+                                    <div className="loading-container">
+                                        <div className="spinner"></div>
+                                    </div>
+                                )}
+                                <div>
+                                    <Message message={msg} />
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="message-box-left">
+                                <div>
+                                    <Message message={msg} />
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                ))}
+            </div>
+            <div
+                ref={editorRef}
+                className="chat-input"
+                contentEditable="true"
+                onPaste={handlerPaste}
+                onKeyDown={handlerKeyDown}
+            >
+            </div>
         </div>
     </div>
   );

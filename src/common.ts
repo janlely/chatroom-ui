@@ -6,7 +6,13 @@ export enum MessageType {
 export interface Message {
     messageId: number,
     type: MessageType,
-    data: string
+    data: string,
+    sender?: string
+}
+
+export interface Memeber {
+    avatar?: string,
+    username: string
 }
 
 export interface MessageDivData {

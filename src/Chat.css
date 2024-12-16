@@ -70,4 +70,22 @@
     padding: 10px;
     background-color: lightgreen;
     border: 1px solid gray;
+    color: black;
+}
+
+.room-members-container {
+  width: 20vw;
+  border: 2px solid black;
+  margin-right: 10px;
+  background-color: white;
+}
+
+.room-member {
+  display: flex;
+  margin-top: 5px;
+  color: black;
+}
+
+.parent {
+  display: flex;
 }
