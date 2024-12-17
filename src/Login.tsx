@@ -24,7 +24,7 @@ function Login() {
     })
   }
   return (
-    <div>
+    <div className="login-container">
       <input ref={userRef} type='text' name='usernameField' placeholder='username' />
       <input ref={passwdRef} type='password' name='passwordField' placeholder='password' />
       <input ref={roomIdRef} type='roomId' name='roomIdField' placeholder='roomId' />
