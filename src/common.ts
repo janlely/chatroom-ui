@@ -21,3 +21,13 @@ export interface MessageDivData {
     success: boolean
     uuid: number
 }
+
+export interface ChatProps {
+    roomId: string,
+    members: Memeber[],
+    messages: MessageDivData[],
+    editorRef: React.RefObject<HTMLDivElement>,
+    msgDivRef: React.RefObject<HTMLDivElement>,
+    handlerPaste: (e: any) => void,
+    handlerSend: (msg: string) => void,
+}

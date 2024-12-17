@@ -1,7 +1,7 @@
-.chat-body {
+.mb-chat-body {
     overflow: auto;
     height: 80vh;
-    width: 50vw;
+    width: 90vw;
     align-items: center;
     border: 2px solid black;
     margin-bottom: 3px;
@@ -9,9 +9,14 @@
     padding: 5px;
 }
 
-.chat-input {
-    height: 15vh;
-    width: 50vw;
+.mb-chat-input-container {
+    display: flex;
+    width: 94vw;
+}
+
+.mb-chat-input {
+    height: 5vh;
+    width: 70vw;
     border: 2px solid black;
     color: black;
     margin-top: 3px;
@@ -20,6 +25,12 @@
     padding: 5px;
     text-align: left;
     overflow-y: auto;
+}
+
+.mb-chat-send {
+    /* margin-left: 10%; */
+    width: 20vw;
+    align-content: center;
 }
 
 /* 定义旋转动画 */
@@ -50,42 +61,49 @@
   animation: spin 1s linear infinite; /* 应用旋转动画 */
 }
 
-.message-container {
+.mb-message-container {
   margin-top: 10px;
 }
 
-.message-box-left {
+.mb-message-box-left {
     justify-content: flex-start;
     display: flex;
 }
 
-.message-box-right {
+.mb-message-box-right {
     /* border: 2px solid black; */
     /* background-color: lightgreen; */
     justify-content: flex-end;
     display: flex;
 }
 
-.message-content {
+.mb-message-content {
     padding: 10px;
     background-color: lightgreen;
     border: 1px solid gray;
     color: black;
 }
 
-.room-members-container {
+.mb-room-members-container {
+  display: none;
   width: 20vw;
   border: 2px solid black;
   margin-right: 10px;
   background-color: white;
 }
 
-.room-member {
+.mb-room-member {
   display: flex;
   margin-top: 5px;
   color: black;
 }
 
-.parent {
+.mb-parent {
   display: flex;
+  justify-content: center;
+}
+
+.mb-chat-header {
+    display: flex;
+    justify-content: center;
 }

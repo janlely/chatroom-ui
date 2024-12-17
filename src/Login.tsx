@@ -28,7 +28,6 @@ function Login() {
       <input ref={userRef} type='text' name='usernameField' placeholder='username' />
       <input ref={passwdRef} type='password' name='passwordField' placeholder='password' />
       <input ref={roomIdRef} type='roomId' name='roomIdField' placeholder='roomId' />
-      {/* <button onClick={onSubmit}/>登录</button> */}
       <button onClick={onClick}>登录</button>
     </div>
   );

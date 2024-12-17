@@ -1,10 +1,15 @@
 import { useEffect, useRef, useState } from "react";
 import axios from 'axios';
 import {MessageType, MessageDivData, Memeber} from "./common"
-import "./Chat.css"
-import Message from "./Message"
+import { useMediaQuery } from 'react-responsive'
+import ChatPC from "./ChatPC";
+import ChatMB from "./ChatMB";
 
 function Chat() {
+  //竖屏
+  const isPortrait = useMediaQuery({ query: '(orientation: portrait)' });
+  //横屏
+  const isLandscape = useMediaQuery({ query: '(orientation: landscape)' });
 
   const roomId = window.location.search.substring(1)
   const editorRef = useRef<HTMLDivElement>(null)
@@ -88,8 +93,8 @@ function Chat() {
     })
   }
 
-  const sendMessage = () => {
-    const content = editorRef.current!.innerText
+  const sendMessage = (content: string) => {
+    // const content = editorRef.current!.innerText
     if (!content || content === "") {
         return
     }
@@ -109,30 +114,30 @@ function Chat() {
     setMessages(uniqueByProperty([...messages, message]))
   }
 
-  const handlerKeyDown = (e: any) => {
-    const editor = editorRef.current!
-    if (e.key === 'Enter' && e.shiftKey) {
-        console.log("shift enter")
-        const selection = window.getSelection()!;
-        const range = selection.getRangeAt(0);
-        const br = document.createElement('br');
-        range.deleteContents();
-        range.insertNode(br);
-        range.setStartAfter(br);
-        range.setEndAfter(br);
-        selection?.removeAllRanges();
-        selection?.addRange(range);
-        return
-    }
+//   const handlerKeyDown = (e: any) => {
+//     const editor = editorRef.current!
+//     if (e.key === 'Enter' && e.shiftKey) {
+//         console.log("shift enter")
+//         const selection = window.getSelection()!;
+//         const range = selection.getRangeAt(0);
+//         const br = document.createElement('br');
+//         range.deleteContents();
+//         range.insertNode(br);
+//         range.setStartAfter(br);
+//         range.setEndAfter(br);
+//         selection?.removeAllRanges();
+//         selection?.addRange(range);
+//         return
+//     }
 
-    if (e.key === "Enter") {
-        console.log("enter")
-        e.preventDefault()
-        sendMessage()
-        editor.innerHTML = ""
-        return
-    }
-  }
+//     if (e.key === "Enter") {
+//         console.log("enter")
+//         e.preventDefault()
+//         sendMessage()
+//         editor.innerHTML = ""
+//         return
+//     }
+//   }
 
   const handlerPaste = (e: any) => {
     console.log("paste")
@@ -206,50 +211,72 @@ function Chat() {
   }
 
   return (
-    <div className="parent">
-        <div className="room-members-container">
-            {members.map(member => (
-                <div className="room-member" key={member.username}>
-                    {member.avatar && <div>{member.avatar}</div>}
-                    <div>{member.username}</div>
-                </div>
-            ))}
-        </div>
-        <div className="chat-place">
-            <div className="chat-body" ref={msgDivRef}>
-                {messages.map(msg => (
-                    <div className="message-container" key={msg.message.messageId}>
-                        {msg.send ? (
-                            <div className="message-box-right">
-                                {!msg.success && (
-                                    <div className="loading-container">
-                                        <div className="spinner"></div>
-                                    </div>
-                                )}
-                                <div>
-                                    <Message message={msg} />
-                                </div>
-                            </div>
-                        ) : (
-                            <div className="message-box-left">
-                                <div>
-                                    <Message message={msg} />
-                                </div>
-                            </div>
-                        )}
-                    </div>
-                ))}
-            </div>
-            <div
-                ref={editorRef}
-                className="chat-input"
-                contentEditable="true"
-                onPaste={handlerPaste}
-                onKeyDown={handlerKeyDown}
-            >
-            </div>
-        </div>
+    <div>
+          {isLandscape &&
+              <ChatPC
+                  roomId={roomId}
+                  messages={messages}
+                  members={members}
+                  editorRef={editorRef}
+                  msgDivRef={msgDivRef}
+                  handlerPaste={handlerPaste}
+                  handlerSend={sendMessage}
+              />}
+          {isPortrait &&
+              <ChatMB
+                  roomId={roomId}
+                  messages={messages}
+                  members={members}
+                  editorRef={editorRef}
+                  msgDivRef={msgDivRef}
+                  handlerPaste={handlerPaste}
+                  handlerSend={sendMessage}
+              />}
     </div>
+    // <div className="parent">
+    //     <div className="room-members-container">
+    //         {members.map(member => (
+    //             <div className="room-member" key={member.username}>
+    //                 {member.avatar && <div>{member.avatar}</div>}
+    //                 <div>{member.username}</div>
+    //             </div>
+    //         ))}
+    //     </div>
+    //     <div className="chat-place">
+    //         <div className="chat-body" ref={msgDivRef}>
+    //             {messages.map(msg => (
+    //                 <div className="message-container" key={msg.message.messageId}>
+    //                     {msg.send ? (
+    //                         <div className="message-box-right">
+    //                             {!msg.success && (
+    //                                 <div className="loading-container">
+    //                                     <div className="spinner"></div>
+    //                                 </div>
+    //                             )}
+    //                             <div>
+    //                                 <Message message={msg} />
+    //                             </div>
+    //                         </div>
+    //                     ) : (
+    //                         <div className="message-box-left">
+    //                             <div>
+    //                                 <Message message={msg} />
+    //                             </div>
+    //                         </div>
+    //                     )}
+    //                 </div>
+    //             ))}
+    //         </div>
+    //         <div
+    //             ref={editorRef}
+    //             className="chat-input"
+    //             contentEditable="true"
+    //             onPaste={handlerPaste}
+    //             onKeyDown={handlerKeyDown}
+    //         >
+    //         </div>
+    //     </div>
+    // </div>
   );
 }
 
