@@ -22,8 +22,8 @@ const ChatMB: React.FC<ChatProps> = (props) => {
             }
         })
         .then(response => {
-            console.log('Upload successful:', response.data);
-            props.handlerSendImg(response.data)
+            console.log('Upload successful:', response.data.url);
+            props.handlerSendImg(response.data.url)
         })
         .catch(error => {
             console.error('Upload error:', error);
