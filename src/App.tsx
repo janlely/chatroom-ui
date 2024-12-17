@@ -3,6 +3,7 @@
 import './App.css'
 import Login from './Login';
 import Chat from './Chat';
+import Goto from './Goto';
 import { BrowserRouter, Routes, Route} from 'react-router';
 
 
@@ -12,6 +13,7 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
+        <Route path="/" element={<Goto/>} />
         <Route path="/Login" element={<Login/>} />
         <Route path="/Chat" element={<Chat/>} />
       </Routes>
