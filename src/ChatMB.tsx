@@ -1,12 +1,26 @@
 import { ChatProps, MessageType } from "./common"
 import TxtMessage from "./TxtMessage"
 import "./ChatMB.css"
-import { useCallback } from "react"
+import { useCallback, useRef } from "react"
 import axios from "axios"
 import ImgMessage from "./ImgMessage"
 
 const ChatMB: React.FC<ChatProps> = (props) => {
 
+    const fileInputRef = useRef<HTMLInputElement>(null);
+    const handleImageChange = (e: any) => {
+        e.preventDefault();
+
+        let file = e.target.files[0]; // 获取File对象
+
+        if (file) {
+            sendImage(file)
+        }
+    };
+
+    const openImgSelection = () => {
+        fileInputRef.current?.click();
+    }
     const handlerClick = () => {
         props.handlerSendTxt(props.editorRef.current!.innerText)
         props.editorRef.current!.innerHTML = ''
@@ -84,6 +98,17 @@ const ChatMB: React.FC<ChatProps> = (props) => {
                         contentEditable="true"
                         onPaste={handlePaste}
                     />
+                    <input
+                        type="file"
+                        accept="image/*"
+                        capture="environment"
+                        ref={fileInputRef}
+                        onChange={handleImageChange}
+                        style={{ display: 'none' }} // 隐藏原始input
+                    />
+                    <button className="mb-circle-button" onClick={openImgSelection}>
+                        <span className="mb-plus">+</span>
+                    </button>
                     <button className="mb-chat-send" onClick={handlerClick}>发送</button>
                 </div>
             </div>

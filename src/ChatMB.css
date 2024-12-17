@@ -107,3 +107,29 @@
     display: flex;
     justify-content: center;
 }
+
+.mb-circle-button {
+  background-color: white; /* 按钮背景颜色 */
+  border: none;
+  color: gray;
+  padding: 20px; /* 圆的大小 */
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 24px; /* 加号大小 */
+  margin: 4px 2px;
+  cursor: pointer;
+  border-radius: 50%; /* 使按钮形状为圆形 */
+  width: 50px; /* 设置按钮宽度 */
+  height: 50px; /* 设置按钮高度 */
+  position: relative; /* 为子元素的位置定位提供基础 */
+}
+
+.mb-plus {
+  position: absolute; /* 相对于父元素定位 */
+  top: 40%; /* 中心对齐 */
+  left: 50%; /* 中心对齐 */
+  transform: translate(-50%, -50%); /* 准确居中 */
+  font-size: 60px; /* 加号大小 */
+  font-weight: bold; /* 加号加粗 */
+}
