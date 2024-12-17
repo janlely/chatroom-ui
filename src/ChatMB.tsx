@@ -101,7 +101,7 @@ const ChatMB: React.FC<ChatProps> = (props) => {
                     <input
                         type="file"
                         accept="image/*"
-                        capture="environment"
+                        // capture="environment"
                         ref={fileInputRef}
                         onChange={handleImageChange}
                         style={{ display: 'none' }} // 隐藏原始input
