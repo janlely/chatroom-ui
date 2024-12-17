@@ -93,7 +93,7 @@ function Chat() {
     })
   }
 
-  const sendMessage = (content: string) => {
+  const sendTxtMessage = (content: string) => {
     // const content = editorRef.current!.innerText
     if (!content || content === "") {
         return
@@ -139,8 +139,24 @@ function Chat() {
 //     }
 //   }
 
-  const handlerPaste = (e: any) => {
-    console.log("paste")
+  const sendImgMessage = (url: string) => {
+    if (!url || url === "") {
+        return
+    }
+    const message: MessageDivData = {
+        message: {
+            messageId: Date.now(),
+            type: MessageType.IMAGE,
+            data: url,
+            sender: "me"
+        },
+        send: true,
+        success: false,
+        uuid: 0
+    }
+    doSendMessage(message)
+    setScrollToBottomNeeded(true)
+    setMessages(uniqueByProperty([...messages, message]))
   }
 
   const connect = () => {
@@ -219,8 +235,8 @@ function Chat() {
                   members={members}
                   editorRef={editorRef}
                   msgDivRef={msgDivRef}
-                  handlerPaste={handlerPaste}
-                  handlerSend={sendMessage}
+                  handlerSendImg={sendImgMessage}
+                  handlerSendTxt={sendTxtMessage}
               />}
           {isPortrait &&
               <ChatMB
@@ -229,8 +245,8 @@ function Chat() {
                   members={members}
                   editorRef={editorRef}
                   msgDivRef={msgDivRef}
-                  handlerPaste={handlerPaste}
-                  handlerSend={sendMessage}
+                  handlerSendImg={sendImgMessage}
+                  handlerSendTxt={sendTxtMessage}
               />}
     </div>
     // <div className="parent">

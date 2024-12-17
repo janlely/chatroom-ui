@@ -28,6 +28,10 @@ export interface ChatProps {
     messages: MessageDivData[],
     editorRef: React.RefObject<HTMLDivElement>,
     msgDivRef: React.RefObject<HTMLDivElement>,
-    handlerPaste: (e: any) => void,
-    handlerSend: (msg: string) => void,
+    handlerSendImg: (url: string) => void,
+    handlerSendTxt: (msg: string) => void,
+}
+
+export interface MessageProps {
+    message: MessageDivData
 }

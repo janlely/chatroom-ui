@@ -1,13 +1,46 @@
-import { ChatProps } from "./common"
-import Message from "./Message"
+import { ChatProps, MessageType } from "./common"
+import TxtMessage from "./TxtMessage"
 import "./ChatMB.css"
+import { useCallback } from "react"
+import axios from "axios"
+import ImgMessage from "./ImgMessage"
 
 const ChatMB: React.FC<ChatProps> = (props) => {
 
     const handlerClick = () => {
-        props.handlerSend(props.editorRef.current!.innerText)
+        props.handlerSendTxt(props.editorRef.current!.innerText)
         props.editorRef.current!.innerHTML = ''
     }
+
+    const sendImage = (blob: any) => {
+        const formData = new FormData();
+        formData.append('file', blob, 'image.png'); // 第三个参数是文件名，根据实际情况修改
+
+        axios.post('https://fars.ee/', formData, {
+            headers: {
+            'Content-Type': 'multipart/form-data'
+            }
+        })
+        .then(response => {
+            console.log('Upload successful:', response.data);
+            props.handlerSendImg(response.data)
+        })
+        .catch(error => {
+            console.error('Upload error:', error);
+        });
+    }
+    const handlePaste = useCallback((event: any) => {
+        event.preventDefault();
+        const items = (event.clipboardData || event.originalEvent.clipboardData).items;
+        for (let item of items) {
+            if (item.kind === 'file') {
+                const blob = item.getAsFile();
+                if (blob && blob.type.startsWith('image')) {
+                    sendImage(blob)
+                }
+            }
+        }
+    }, []);
     return (
         <div className="mb-parent">
             <div className="mb-room-members-container">
@@ -31,13 +64,13 @@ const ChatMB: React.FC<ChatProps> = (props) => {
                                         </div>
                                     )}
                                     <div>
-                                        <Message message={msg} />
+                                        {msg.message.type == MessageType.TEXT ? <TxtMessage message={msg} /> : <ImgMessage message={msg}/>}
                                     </div>
                                 </div>
                             ) : (
                                 <div className="mb-message-box-left">
                                     <div>
-                                        <Message message={msg} />
+                                        {msg.message.type == MessageType.TEXT ? <TxtMessage message={msg} /> : <ImgMessage message={msg}/>}
                                     </div>
                                 </div>
                             )}
@@ -49,7 +82,7 @@ const ChatMB: React.FC<ChatProps> = (props) => {
                         ref={props.editorRef}
                         className="mb-chat-input"
                         contentEditable="true"
-                        onPaste={props.handlerPaste}
+                        onPaste={handlePaste}
                     />
                     <button className="mb-chat-send" onClick={handlerClick}>发送</button>
                 </div>

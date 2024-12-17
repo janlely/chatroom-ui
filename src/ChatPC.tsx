@@ -1,6 +1,10 @@
-import { ChatProps } from "./common"
-import Message from "./Message"
+import { ChatProps, MessageType } from "./common"
+import TxtMessage from "./TxtMessage"
+import ImgMessage from "./ImgMessage"
 import "./ChatPC.css" 
+import { useCallback } from "react"
+import axios from "axios"
+import FormData from "form-data"
 
 const ChatPC: React.FC<ChatProps> = (props) => {
     const handlerKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
@@ -22,11 +26,41 @@ const ChatPC: React.FC<ChatProps> = (props) => {
         if (e.key === "Enter") {
             console.log("enter")
             e.preventDefault()
-            props.handlerSend(editor.innerText)
+            props.handlerSendTxt(editor.innerText)
             editor.innerHTML = ""
             return
         }
     }
+    const sendImage = (blob: any) => {
+        const formData = new FormData();
+        formData.append('file', blob, 'image.png'); // 第三个参数是文件名，根据实际情况修改
+
+        axios.post('https://fars.ee/', formData, {
+            headers: {
+            'Content-Type': 'multipart/form-data'
+            }
+        })
+        .then(response => {
+            console.log('Upload successful:', response.data.url);
+            props.handlerSendImg(response.data.url)
+        })
+        .catch(error => {
+            console.error('Upload error:', error);
+        });
+    }
+    const handlePaste = useCallback((event: any) => {
+        event.preventDefault();
+        const items = (event.clipboardData || event.originalEvent.clipboardData).items;
+        for (let item of items) {
+            if (item.kind === 'file') {
+                const blob = item.getAsFile();
+                if (blob && blob.type.startsWith('image')) {
+                    sendImage(blob)
+                }
+            }
+        }
+    }, []);
+
     return (
         <div className="pc-parent">
             <div className="pc-room-members-container">
@@ -49,13 +83,13 @@ const ChatPC: React.FC<ChatProps> = (props) => {
                                         </div>
                                     )}
                                     <div>
-                                        <Message message={msg} />
+                                        {msg.message.type == MessageType.TEXT ? <TxtMessage message={msg} /> : <ImgMessage message={msg}/>}
                                     </div>
                                 </div>
                             ) : (
                                 <div className="pc-message-box-left">
                                     <div>
-                                        <Message message={msg} />
+                                        {msg.message.type == MessageType.TEXT ? <TxtMessage message={msg} /> : <ImgMessage message={msg}/>}
                                     </div>
                                 </div>
                             )}
@@ -65,8 +99,8 @@ const ChatPC: React.FC<ChatProps> = (props) => {
                 <div
                     ref={props.editorRef}
                     className="pc-chat-input"
-                    contentEditable="true"
-                    onPaste={props.handlerPaste}
+                    contentEditable
+                    onPaste={handlePaste}
                     onKeyDown={handlerKeyDown}
                 >
                 </div>

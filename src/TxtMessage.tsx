@@ -1,10 +1,7 @@
-import { MessageDivData} from "./common"
-import "./Message.css"
+import { MessageProps } from "./common"
+import "./ImgMessage.css"
 
-interface MessageProps {
-    message: MessageDivData
-}
-const Message: React.FC<MessageProps> = ({ message}) => {
+const TxtMessage: React.FC<MessageProps> = ({ message}) => {
     return (
         <div className="message">
             <div>
@@ -15,4 +12,4 @@ const Message: React.FC<MessageProps> = ({ message}) => {
     )
 }
 
-export default Message
+export default TxtMessage
