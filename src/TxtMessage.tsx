@@ -1,12 +1,12 @@
 import { MessageProps } from "./common"
-import "./ImgMessage.css"
+import "./TxtMessage.css"
 
 const TxtMessage: React.FC<MessageProps> = ({ message}) => {
     return (
         <div className="message">
             <div>
-                <div className={`message-sender ${message.send ? 'align-right' : 'align-left'}`}>{message.message.sender}</div>
-                <div className="message-content">{message.message.data}</div>
+                <div className={`txt-message-sender ${message.send ? 'align-right' : 'align-left'}`}>{message.message.sender}</div>
+                <div className="txt-message-content">{message.message.data}</div>
             </div>
         </div>
     )

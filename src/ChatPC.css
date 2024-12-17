@@ -33,14 +33,14 @@
 }
 
 /* 容器样式 */
-.loading-container {
+.pc-loading-container {
   display: flex;
   justify-content: center;
   align-items: center;
 }
 
 /* 旋转图标样式 */
-.spinner {
+.pc-spinner {
   margin-right: 10px;
   width: 15px;
   height: 15px;

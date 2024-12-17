@@ -72,6 +72,7 @@ function Chat() {
     })
   }
 
+
   const doSendMessage = (message: MessageDivData) => {
     axios.post("/api/chat/send", message.message, {
         headers: {
@@ -90,6 +91,7 @@ function Chat() {
                     : msg
             ))
         );
+        setScrollToBottomNeeded(true)
     })
   }
 
@@ -114,49 +116,43 @@ function Chat() {
     setMessages(uniqueByProperty([...messages, message]))
   }
 
-//   const handlerKeyDown = (e: any) => {
-//     const editor = editorRef.current!
-//     if (e.key === 'Enter' && e.shiftKey) {
-//         console.log("shift enter")
-//         const selection = window.getSelection()!;
-//         const range = selection.getRangeAt(0);
-//         const br = document.createElement('br');
-//         range.deleteContents();
-//         range.insertNode(br);
-//         range.setStartAfter(br);
-//         range.setEndAfter(br);
-//         selection?.removeAllRanges();
-//         selection?.addRange(range);
-//         return
-//     }
 
-//     if (e.key === "Enter") {
-//         console.log("enter")
-//         e.preventDefault()
-//         sendMessage()
-//         editor.innerHTML = ""
-//         return
-//     }
-//   }
+  const sendImage = (blob: any, message: MessageDivData) => {
+      const formData = new FormData();
+      formData.append('file', blob, 'image.png'); // 第三个参数是文件名，根据实际情况修改
 
-  const sendImgMessage = (url: string) => {
-    if (!url || url === "") {
+      axios.post('https://fars.ee/', formData, {
+          headers: {
+          'Content-Type': 'multipart/form-data'
+          }
+      })
+      .then(response => {
+          doSendMessage({...message, message: {...message.message, data: response.data.url}})
+      })
+      .catch(error => {
+          console.error('Upload error:', error);
+      });
+  }
+
+  const sendImgMessage = (blob: any) => {
+    if (!blob) {
         return
     }
     const message: MessageDivData = {
         message: {
             messageId: Date.now(),
             type: MessageType.IMAGE,
-            data: url,
+            data: "",
             sender: "me"
         },
         send: true,
         success: false,
         uuid: 0
     }
-    doSendMessage(message)
+    sendImage(blob, message)
+    // doSendImgMessage(message, blob)
+    setMessages(uniqueByProperty([...messagesRef.current, message]))
     setScrollToBottomNeeded(true)
-    setMessages(uniqueByProperty([...messages, message]))
   }
 
   const connect = () => {
@@ -249,50 +245,6 @@ function Chat() {
                   handlerSendTxt={sendTxtMessage}
               />}
     </div>
-    // <div className="parent">
-    //     <div className="room-members-container">
-    //         {members.map(member => (
-    //             <div className="room-member" key={member.username}>
-    //                 {member.avatar && <div>{member.avatar}</div>}
-    //                 <div>{member.username}</div>
-    //             </div>
-    //         ))}
-    //     </div>
-    //     <div className="chat-place">
-    //         <div className="chat-body" ref={msgDivRef}>
-    //             {messages.map(msg => (
-    //                 <div className="message-container" key={msg.message.messageId}>
-    //                     {msg.send ? (
-    //                         <div className="message-box-right">
-    //                             {!msg.success && (
-    //                                 <div className="loading-container">
-    //                                     <div className="spinner"></div>
-    //                                 </div>
-    //                             )}
-    //                             <div>
-    //                                 <Message message={msg} />
-    //                             </div>
-    //                         </div>
-    //                     ) : (
-    //                         <div className="message-box-left">
-    //                             <div>
-    //                                 <Message message={msg} />
-    //                             </div>
-    //                         </div>
-    //                     )}
-    //                 </div>
-    //             ))}
-    //         </div>
-    //         <div
-    //             ref={editorRef}
-    //             className="chat-input"
-    //             contentEditable="true"
-    //             onPaste={handlerPaste}
-    //             onKeyDown={handlerKeyDown}
-    //         >
-    //         </div>
-    //     </div>
-    // </div>
   );
 }
 

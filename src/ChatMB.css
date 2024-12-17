@@ -5,13 +5,14 @@
     align-items: center;
     border: 2px solid black;
     margin-bottom: 3px;
-    background-color: white;
+    background-color: lightslategray;
     padding: 5px;
 }
 
 .mb-chat-input-container {
     display: flex;
     width: 94vw;
+    background-color: lightslategray;
 }
 
 .mb-chat-input {
@@ -20,7 +21,7 @@
     border: 2px solid black;
     color: black;
     margin-top: 3px;
-    background-color: white;
+    background-color: lightslategray;
     caret-color: black;
     padding: 5px;
     text-align: left;
@@ -31,6 +32,8 @@
     /* margin-left: 10%; */
     width: 20vw;
     align-content: center;
+    color: black;
+    background-color: lightgreen;
 }
 
 /* 定义旋转动画 */
@@ -44,14 +47,14 @@
 }
 
 /* 容器样式 */
-.loading-container {
+.mb-loading-container {
   display: flex;
   justify-content: center;
   align-items: center;
 }
 
 /* 旋转图标样式 */
-.spinner {
+.mb-spinner {
   margin-right: 10px;
   width: 15px;
   height: 15px;
@@ -110,7 +113,7 @@
 
 .mb-circle-button {
   background-color: white; /* 按钮背景颜色 */
-  border: none;
+  border: 1px solid gray;
   color: gray;
   padding: 20px; /* 圆的大小 */
   text-align: center;
