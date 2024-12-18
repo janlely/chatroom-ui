@@ -146,8 +146,8 @@ function Chat() {
       .then((urls) => {
         let newData = {...JSON.parse(message.message.data), thumbnail: urls[0], url: urls[1]}
         doSendMessage(message,
-          (msg, uuid) => {
-            return { ...msg, message: { ...msg.message, data: JSON.stringify(newData) } }
+          (msg, _) => {
+            return { ...msg, blob: undefined, message: { ...msg.message, data: JSON.stringify(newData) } }
           })
       })
       .catch(_ => {
@@ -173,7 +173,8 @@ function Chat() {
           send: true,
           success: false,
           uuid: 0,
-          failed: false
+          failed: false,
+          blob: blob
       }
       sendImage(blob, thumbnailBlob, message)
       setMessages(uniqueByProperty([...messagesRef.current, message]))
