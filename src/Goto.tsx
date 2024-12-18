@@ -14,7 +14,7 @@ function Goto() {
   }
   return (
     <div>
-      <input ref={inputRef} type='roomId' name='roomId' placeholder='请输入房间号' />
+      <input ref={inputRef} type='roomId' name='roomId' value='123456' />
       <button onClick={handleClick}>进入房间</button>
     </div>
   );
