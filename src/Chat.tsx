@@ -87,7 +87,7 @@ function Chat() {
       } else {
         let data = messagesRef.current[msgIdx].message.data
         setMessages(messagesRef.current.splice(msgIdx, 1))
-        sendMessage(data, MessageType.TEXT)
+        sendMessage(data, MessageType.IMAGE)
       }
     }
   }
