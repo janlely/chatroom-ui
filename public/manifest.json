@@ -7,5 +7,5 @@
     "social"
   ],
   "short_name": "JChat",
-  "start_url": "/"
+  "start_url": "/login"
 }
