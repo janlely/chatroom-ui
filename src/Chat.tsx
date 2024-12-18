@@ -4,6 +4,7 @@ import {MessageType, MessageDivData, Memeber, generateThumbnail} from "./common"
 import { useMediaQuery } from 'react-responsive'
 import ChatPC from "./ChatPC";
 import ChatMB from "./ChatMB";
+import { data } from "react-router-dom";
 
 function Chat() {
   //竖屏
@@ -106,7 +107,7 @@ function Chat() {
         setMessages(prevMessages =>
             uniqueByProperty(prevMessages.map(msg =>
                 msg.message.messageId === message.message.messageId
-                    ? { ...msg, success: true, uuid: res.data.uuid }
+                    ? { ...msg, success: true, uuid: res.data.uuid, message: { ...msg.message, data: msg.message.data } } 
                     : msg
             ))
         );
