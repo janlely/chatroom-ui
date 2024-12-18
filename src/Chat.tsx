@@ -93,7 +93,7 @@ function Chat() {
   }
 
   const doSendMessage = (message: MessageDivData, sprend: (_: MessageDivData, __: any) => MessageDivData) => {
-    axios.post("/api/chat/send", sprend(message,0), {
+    axios.post("/api/chat/send", sprend(message,0).message, {
         headers: {
             "RoomId": roomId
         }
