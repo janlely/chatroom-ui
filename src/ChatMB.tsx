@@ -21,7 +21,7 @@ const ChatMB: React.FC<ChatProps> = (props) => {
         fileInputRef.current?.click();
     }
     const handlerClick = () => {
-        props.handlerSendTxt(props.editorRef.current!.innerText)
+        props.handlerSendTxt(props.editorRef.current!.innerText, MessageType.TEXT)
         props.editorRef.current!.innerHTML = ''
     }
 
@@ -56,9 +56,15 @@ const ChatMB: React.FC<ChatProps> = (props) => {
                             {msg.send ? (
                                 <div className="mb-message-box-right">
                                     {!msg.success && (
-                                        <div className="mb-loading-container">
-                                            <div className="mb-spinner"></div>
-                                        </div>
+                                        msg.failed ? (
+                                            <div onClick={() => props.handlerRetry(msg.message.messageId)}>
+                                                <span>重试</span>
+                                            </div>
+                                        ) : (
+                                            <div className="mb-loading-container">
+                                                <div className="mb-spinner"></div>
+                                            </div>
+                                        )
                                     )}
                                     <div>
                                         {msg.message.type == MessageType.TEXT ? <TxtMessage message={msg} /> : <ImgMessage message={msg}/>}

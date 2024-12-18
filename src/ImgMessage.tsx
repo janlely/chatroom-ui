@@ -15,14 +15,14 @@ const ImgMessage: React.FC<MessageProps> = ({ message}) => {
                 <div className="message-content">
                     <img
                         className="thumbnail"
-                        src={message.message.data}
+                        src={JSON.parse(message.message.data).thumbnail}
                         alt="Thumbnail"
                         onClick={handleImageClick}
                         style={{ cursor: 'pointer' }}
                     />
                     {isFullscreen && (
                         <div className="fullscreen" onClick={handleImageClick}>
-                            <img src={message.message.data} alt="Full Size" />
+                            <img src={JSON.parse(message.message.data).url} alt="Full Size" />
                         </div>
                     )}
                 </div>

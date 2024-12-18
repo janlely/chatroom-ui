@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import axios from 'axios';
-import {MessageType, MessageDivData, Memeber} from "./common"
+import {MessageType, MessageDivData, Memeber, generateThumbnail} from "./common"
 import { useMediaQuery } from 'react-responsive'
 import ChatPC from "./ChatPC";
 import ChatMB from "./ChatMB";
@@ -72,8 +72,27 @@ function Chat() {
     })
   }
 
+  const retryMessage = (msgId: number) => {
+    let msgIdx: number = messagesRef.current.findIndex(msg => msg.send && msg.message.messageId === msgId)
+    if (messagesRef.current[msgIdx].message.type === MessageType.TEXT) {
+      let data = messagesRef.current[msgIdx].message.data
+      setMessages(messagesRef.current.splice(msgIdx, 1))
+      sendMessage(data, MessageType.TEXT)
+    } else if (messagesRef.current[msgIdx].message.type === MessageType.IMAGE) {
+      let msgData = JSON.parse(messagesRef.current[msgIdx].message.data)
+      if (!msgData.url && messagesRef.current[msgIdx]?.blob) {
+        let blob = messagesRef.current[msgIdx].blob
+        setMessages(messagesRef.current.splice(msgIdx, 1))
+        sendImgMessage(blob)
+      } else {
+        let data = messagesRef.current[msgIdx].message.data
+        setMessages(messagesRef.current.splice(msgIdx, 1))
+        sendMessage(data, MessageType.TEXT)
+      }
+    }
+  }
 
-  const doSendMessage = (message: MessageDivData) => {
+  const doSendMessage = (message: MessageDivData, sprend: (_: MessageDivData, __: any) => MessageDivData) => {
     axios.post("/api/chat/send", message.message, {
         headers: {
             "RoomId": roomId
@@ -87,7 +106,7 @@ function Chat() {
         setMessages(prevMessages =>
             uniqueByProperty(prevMessages.map(msg =>
                 msg.message.messageId === message.message.messageId
-                    ? { ...msg, success: true, uuid: res.data.uuid }
+                    ? sprend(msg, res.data.uuid)
                     : msg
             ))
         );
@@ -95,7 +114,7 @@ function Chat() {
     })
   }
 
-  const sendTxtMessage = (content: string) => {
+  const sendMessage = (content: string, type: MessageType) => {
     // const content = editorRef.current!.innerText
     if (!content || content === "") {
         return
@@ -103,15 +122,16 @@ function Chat() {
     const message: MessageDivData = {
         message: {
             messageId: Date.now(),
-            type: MessageType.TEXT,
-            data: editorRef.current!.innerText,
+            type: type,
+            data: content,
             sender: "me"
         },
         send: true,
         success: false,
-        uuid: 0
+        uuid: 0,
+        failed: false
     }
-    doSendMessage(message)
+    doSendMessage(message, (msg, uuid) => ({ ...msg, success: true, uuid: uuid }))
     setScrollToBottomNeeded(true)
     setMessages(uniqueByProperty([...messages, message]))
   }
@@ -127,32 +147,53 @@ function Chat() {
           }
       })
       .then(response => {
-          doSendMessage({...message, message: {...message.message, data: response.data.url}})
+        let newData = {...JSON.parse(message.message.data), url: response.data.url}
+        doSendMessage(message,
+          (msg, uuid) => ({ ...msg, success: true, uuid: uuid, message: { ...msg.message, data: JSON.stringify(newData) } }))
       })
       .catch(error => {
-          console.error('Upload error:', error);
+        setMessages(prevMessages =>
+            uniqueByProperty(prevMessages.map(msg =>
+                msg.message.messageId === message.message.messageId
+                    ? {...msg, failed: true} 
+                    : msg
+            ))
+        );
       });
   }
 
-  const sendImgMessage = (blob: any) => {
+  const uploadImgThenSend = (blob: any, thumbnailUrl: string) => {
+    
+      const message: MessageDivData = {
+          message: {
+              messageId: Date.now(),
+              type: MessageType.IMAGE,
+              data: JSON.stringify({thumbnail: thumbnailUrl, url: ""}),
+              sender: "me"
+          },
+          send: true,
+          success: false,
+          uuid: 0,
+          failed: false
+      }
+      sendImage(blob, message)
+      setMessages(uniqueByProperty([...messagesRef.current, message]))
+      setScrollToBottomNeeded(true)
+  }
+
+  const sendImgMessage = (blob: any, thumbnailUrl?: string) => {
     if (!blob) {
         return
     }
-    const message: MessageDivData = {
-        message: {
-            messageId: Date.now(),
-            type: MessageType.IMAGE,
-            data: "",
-            sender: "me"
-        },
-        send: true,
-        success: false,
-        uuid: 0
-    }
-    sendImage(blob, message)
-    // doSendImgMessage(message, blob)
-    setMessages(uniqueByProperty([...messagesRef.current, message]))
-    setScrollToBottomNeeded(true)
+    if (thumbnailUrl) {
+      uploadImgThenSend(blob, thumbnailUrl!)
+      return
+    } 
+    generateThumbnail(blob, 100, 100).then(thumbnailUrl=> {
+      uploadImgThenSend(blob, thumbnailUrl)
+    }).catch(err => {
+      console.log("error create thumbnail", err)
+    })
   }
 
   const connect = () => {
@@ -232,7 +273,8 @@ function Chat() {
                   editorRef={editorRef}
                   msgDivRef={msgDivRef}
                   handlerSendImg={sendImgMessage}
-                  handlerSendTxt={sendTxtMessage}
+                  handlerSendTxt={sendMessage}
+                  handlerRetry={retryMessage}
               />}
           {isPortrait &&
               <ChatMB
@@ -242,7 +284,8 @@ function Chat() {
                   editorRef={editorRef}
                   msgDivRef={msgDivRef}
                   handlerSendImg={sendImgMessage}
-                  handlerSendTxt={sendTxtMessage}
+                  handlerSendTxt={sendMessage}
+                  handlerRetry={retryMessage}
               />}
     </div>
   );

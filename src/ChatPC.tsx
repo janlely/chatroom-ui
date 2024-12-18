@@ -26,7 +26,7 @@ const ChatPC: React.FC<ChatProps> = (props) => {
         if (e.key === "Enter") {
             console.log("enter")
             e.preventDefault()
-            props.handlerSendTxt(editor.innerText)
+            props.handlerSendTxt(editor.innerText, MessageType.TEXT)
             editor.innerHTML = ""
             return
         }
