@@ -4,7 +4,7 @@ import axios from 'axios';
 
 function Login() {
   const userRef= useRef<HTMLInputElement>(null)
-  const passwdRef = useRef<HTMLInputElement>(null)
+  // const passwdRef = useRef<HTMLInputElement>(null)
   const roomIdRef = useRef<HTMLInputElement>(null)
   const optRef = useRef<HTMLInputElement>(null)
   
@@ -12,7 +12,7 @@ function Login() {
     console.log('submit')
     axios.post("/api/login", {
         username: userRef.current?.value,
-        password: passwdRef.current?.value,
+        // password: passwdRef.current?.value,
         roomId: roomIdRef.current?.value,
         token: optRef.current?.value
     }).then(res => {
@@ -28,7 +28,7 @@ function Login() {
   return (
     <div className="login-container">
       <input ref={userRef} type='text' placeholder='username' />
-      <input ref={passwdRef} type='password' placeholder='password' />
+      {/* <input ref={passwdRef} type='password' placeholder='password' /> */}
       <input ref={optRef} type='text' placeholder='opt' />
       <input ref={roomIdRef} type='roomId' value="123456" />
       <button onClick={onClick}>登录</button>
