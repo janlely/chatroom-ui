@@ -2,5 +2,10 @@
   "name": "JChat",
   "theme_color": "#000000",
   "background_color": "#000000",
-  "id": "janlely"
+  "id": "janlely",
+  "categories": [
+    "social"
+  ],
+  "short_name": "JChat",
+  "start_url": "/"
 }
