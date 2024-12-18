@@ -93,7 +93,7 @@ function Chat() {
   }
 
   const doSendMessage = (message: MessageDivData, sprend: (_: MessageDivData, __: any) => MessageDivData) => {
-    axios.post("/api/chat/send", message.message, {
+    axios.post("/api/chat/send", sprend(message,0), {
         headers: {
             "RoomId": roomId
         }
@@ -106,7 +106,7 @@ function Chat() {
         setMessages(prevMessages =>
             uniqueByProperty(prevMessages.map(msg =>
                 msg.message.messageId === message.message.messageId
-                    ? sprend(msg, res.data.uuid)
+                    ? sprend(msg, res.data.uuid) 
                     : msg
             ))
         );
@@ -149,7 +149,9 @@ function Chat() {
       .then(response => {
         let newData = {...JSON.parse(message.message.data), url: response.data.url}
         doSendMessage(message,
-          (msg, uuid) => ({ ...msg, success: true, uuid: uuid, message: { ...msg.message, data: JSON.stringify(newData) } }))
+          (msg, uuid) => {
+            return { ...msg, success: true, uuid: uuid, message: { ...msg.message, data: JSON.stringify(newData) } }
+          })
       })
       .catch(error => {
         setMessages(prevMessages =>

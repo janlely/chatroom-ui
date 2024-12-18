@@ -78,13 +78,16 @@ const ChatPC: React.FC<ChatProps> = (props) => {
                             {msg.send ? (
                                 <div className="pc-message-box-right">
                                     {!msg.success && (
-                                        <div className="pc-loading-container">
-                                            <div className="pc-spinner"></div>
-                                        </div>
+                                        msg.failed ? (
+                                            <div onClick={() => props.handlerRetry(msg.message.messageId)}>
+                                                <span>重试</span>
+                                            </div>
+                                        ) : (
+                                            <div className="mb-loading-container">
+                                                <div className="mb-spinner"></div>
+                                            </div>
+                                        )
                                     )}
-                                    <div>
-                                        {msg.message.type == MessageType.TEXT ? <TxtMessage message={msg} /> : <ImgMessage message={msg}/>}
-                                    </div>
                                 </div>
                             ) : (
                                 <div className="pc-message-box-left">
