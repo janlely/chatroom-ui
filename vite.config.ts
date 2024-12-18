@@ -12,7 +12,7 @@ export default defineConfig({
       injectRegister: 'auto', // 控制如何在应用程序中注册ServiceWorker 默认值是 'auto' ，其他如：'inline' 则是注入一个简单的注册脚本，内联在应用程序入口点中
       manifest: { // manifest.json 文件配置
         name: 'Simple Private Group Chat',
-        short_name: 'spgc',
+        short_name: 'Whisper',
         description: 'Simple Private Group Chat',
         theme_color: '#ffffff',
         start_url: "/login",
