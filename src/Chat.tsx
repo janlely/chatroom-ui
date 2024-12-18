@@ -1,10 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import axios from 'axios';
-import {MessageType, MessageDivData, Memeber, generateThumbnail} from "./common"
+import {MessageType, MessageDivData, Memeber, generateThumbnail, uploadImages} from "./common"
 import { useMediaQuery } from 'react-responsive'
 import ChatPC from "./ChatPC";
 import ChatMB from "./ChatMB";
-import { data } from "react-router-dom";
 
 function Chat() {
   //竖屏
@@ -139,23 +138,19 @@ function Chat() {
   }
 
 
-  const sendImage = (blob: any, message: MessageDivData) => {
+  const sendImage = (blob: any, thumbnailBlob: any, message: MessageDivData) => {
       const formData = new FormData();
       formData.append('file', blob, 'image.png'); // 第三个参数是文件名，根据实际情况修改
 
-      axios.post('https://fars.ee/', formData, {
-          headers: {
-          'Content-Type': 'multipart/form-data'
-          }
-      })
-      .then(response => {
-        let newData = {...JSON.parse(message.message.data), url: response.data.url}
+      uploadImages(thumbnailBlob, blob)
+      .then((urls) => {
+        let newData = {...JSON.parse(message.message.data), thumbnail: urls[0], url: urls[1]}
         doSendMessage(message,
           (msg, uuid) => {
             return { ...msg, message: { ...msg.message, data: JSON.stringify(newData) } }
           })
       })
-      .catch(error => {
+      .catch(_ => {
         setMessages(prevMessages =>
             uniqueByProperty(prevMessages.map(msg =>
                 msg.message.messageId === message.message.messageId
@@ -166,13 +161,13 @@ function Chat() {
       });
   }
 
-  const uploadImgThenSend = (blob: any, thumbnailUrl: string) => {
+  const uploadImgThenSend = (blob: any, thumbnailBlob: Blob) => {
     
       const message: MessageDivData = {
           message: {
               messageId: Date.now(),
               type: MessageType.IMAGE,
-              data: JSON.stringify({thumbnail: thumbnailUrl, url: ""}),
+              data: JSON.stringify({thumbnail: URL.createObjectURL(thumbnailBlob), url: ""}),
               sender: "me"
           },
           send: true,
@@ -180,21 +175,17 @@ function Chat() {
           uuid: 0,
           failed: false
       }
-      sendImage(blob, message)
+      sendImage(blob, thumbnailBlob, message)
       setMessages(uniqueByProperty([...messagesRef.current, message]))
       setScrollToBottomNeeded(true)
   }
 
-  const sendImgMessage = (blob: any, thumbnailUrl?: string) => {
+  const sendImgMessage = (blob: any) => {
     if (!blob) {
         return
     }
-    if (thumbnailUrl) {
-      uploadImgThenSend(blob, thumbnailUrl!)
-      return
-    } 
-    generateThumbnail(blob, 100, 100).then(thumbnailUrl=> {
-      uploadImgThenSend(blob, thumbnailUrl)
+    generateThumbnail(blob, 100, 100).then(thumbnailBlob => {
+      uploadImgThenSend(blob, thumbnailBlob)
     }).catch(err => {
       console.log("error create thumbnail", err)
     })

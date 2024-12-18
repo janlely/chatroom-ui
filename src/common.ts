@@ -1,3 +1,5 @@
+import axios from 'axios';
+
 export enum MessageType {
     TEXT,
     IMAGE
@@ -39,7 +41,7 @@ export interface ChatProps {
 export interface MessageProps {
     message: MessageDivData
 }
-export function generateThumbnail(blob: Blob, maxWidth: number, maxHeight: number): Promise<string> {
+export function generateThumbnail(blob: Blob, maxWidth: number, maxHeight: number): Promise<Blob> {
   return new Promise((resolve, reject) => {
     // 创建一个新的 Image 对象
     const img = new Image();
@@ -84,7 +86,7 @@ export function generateThumbnail(blob: Blob, maxWidth: number, maxHeight: numbe
       canvas.toBlob(
         (thumbnailBlob) => {
           if (thumbnailBlob) {
-            resolve(URL.createObjectURL(thumbnailBlob));
+            resolve(thumbnailBlob);
           } else {
             reject(new Error('无法生成缩略图 Blob'));
           }
@@ -99,13 +101,59 @@ export function generateThumbnail(blob: Blob, maxWidth: number, maxHeight: numbe
       reject(new Error('图像加载失败'));
     };
 
-//     // 将 Blob 转换为 URL，并设置为 Image 的 src 属性
-//     const imageUrl = URL.createObjectURL(blob);
-//     img.src = imageUrl;
-
-//     // 在图像加载完成后释放 URL
-//     img.onload = () => {
-//       URL.revokeObjectURL(imageUrl);
-//     };
   });
 }
+
+
+export async function uploadImages(thumbnailBlob: any, blob: any): Promise<string[]> {
+  return Promise.all([toTmpfile(thumbnailBlob), toFarsee(blob)])
+}
+
+export async function toFarsee(blob: any): Promise<string> {
+
+  const formData = new FormData();
+  formData.append('file', blob, 'image.png'); // 第三个参数是文件名，根据实际情况修改
+  const response = await axios.post('https://fars.ee/', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data'
+    }
+  })
+  if (response.data.url) {
+    return response.data.url 
+  } else {
+    throw new Error("上传失败")
+  }
+}
+
+export async function to0x0(blob: any): Promise<string> {
+  const formData = new FormData();
+  formData.append('file', blob, 'image.png'); // 第三个参数是文件名，根据实际情况修改
+  const response = await axios.post('https://0x0.st', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data'
+    }
+  })
+  if (response.data) {
+    return response.data
+  } else {
+    throw new Error("上传失败")
+  }
+}
+
+
+export async function toTmpfile(blob: any): Promise<string> {
+  const formData = new FormData();
+  formData.append('file', blob, 'image.png'); // 第三个参数是文件名，根据实际情况修改
+  const response = await axios.post('https://tmpfiles.org/api/v1/upload', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data'
+    }
+  })
+  if (response.data.status == "success") {
+    return (response.data.data.url as string).replace(/^https:\/\/tmpfiles.org/,'https://tmpfiles.org/dl')
+  } else {
+    throw new Error("上传失败")
+  }
+}
+
+
