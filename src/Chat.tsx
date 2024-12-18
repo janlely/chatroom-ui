@@ -106,7 +106,7 @@ function Chat() {
         setMessages(prevMessages =>
             uniqueByProperty(prevMessages.map(msg =>
                 msg.message.messageId === message.message.messageId
-                    ? sprend(msg, res.data.uuid) 
+                    ? { ...msg, success: true, uuid: res.data.uuid }
                     : msg
             ))
         );
@@ -131,7 +131,7 @@ function Chat() {
         uuid: 0,
         failed: false
     }
-    doSendMessage(message, (msg, uuid) => ({ ...msg, success: true, uuid: uuid }))
+    doSendMessage(message, (msg, _) => msg)
     setScrollToBottomNeeded(true)
     setMessages(uniqueByProperty([...messages, message]))
   }
@@ -150,7 +150,7 @@ function Chat() {
         let newData = {...JSON.parse(message.message.data), url: response.data.url}
         doSendMessage(message,
           (msg, uuid) => {
-            return { ...msg, success: true, uuid: uuid, message: { ...msg.message, data: JSON.stringify(newData) } }
+            return { ...msg, message: { ...msg.message, data: JSON.stringify(newData) } }
           })
       })
       .catch(error => {
