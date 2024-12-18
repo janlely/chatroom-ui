@@ -136,3 +136,14 @@
   font-size: 60px; /* 加号大小 */
   font-weight: bold; /* 加号加粗 */
 }
+
+.mb-resend-contanier {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.mb-resend-button {
+  background-color: transparent;
+  color: darkred;
+}
