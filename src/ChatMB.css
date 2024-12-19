@@ -108,7 +108,8 @@
 
 .mb-chat-header {
     display: flex;
-    justify-content: center;
+    justify-content: space-between;
+    align-items: center;
 }
 
 .mb-circle-button {
@@ -146,4 +147,11 @@
 .mb-resend-button {
   background-color: transparent;
   color: darkred;
+}
+
+.mb-members-container {
+  position: absolute;
+  background-color: black;
+  color: white;
+  width: 15vw;
 }

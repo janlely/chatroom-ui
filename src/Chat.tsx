@@ -35,7 +35,7 @@ function Chat() {
             "RoomId": roomId
         }
     }).then(res => {
-        setMembers(res.data)
+        setMembers(uniqueByProperty(res.data, item => item.username))
     })
   }
 
@@ -109,7 +109,7 @@ function Chat() {
                 msg.message.messageId === message.message.messageId
                     ? { ...msg, success: true, uuid: res.data.uuid, message: { ...msg.message, data: newMessage.message.data } } 
                     : msg
-            ))
+            ), item => item.uuid)
         );
         setScrollToBottomNeeded(true)
     })
@@ -134,7 +134,7 @@ function Chat() {
     }
     doSendMessage(message, (msg, _) => msg)
     setScrollToBottomNeeded(true)
-    setMessages(uniqueByProperty([...messages, message]))
+    setMessages(uniqueByProperty([...messages, message], item => item.uuid))
   }
 
 
@@ -156,7 +156,7 @@ function Chat() {
                 msg.message.messageId === message.message.messageId
                     ? {...msg, failed: true} 
                     : msg
-            ))
+            ), item => item.uuid)
         );
       });
   }
@@ -177,7 +177,7 @@ function Chat() {
           blob: blob
       }
       sendImage(blob, thumbnailBlob, message)
-      setMessages(uniqueByProperty([...messagesRef.current, message]))
+      setMessages(uniqueByProperty([...messagesRef.current, message], item => item.uuid))
       setScrollToBottomNeeded(true)
   }
 
@@ -246,10 +246,10 @@ function Chat() {
   }
 
 
-  const uniqueByProperty = (items: any[]): any[] => {
+  const uniqueByProperty = (items: any[], propGetter: (_: any) => any): any[] => {
       const seen = new Set();
       return items.filter(item => {
-          const propValue = item.uuid;
+          const propValue = propGetter(item);
           if (seen.has(propValue)) {
               return false;
           } else {
