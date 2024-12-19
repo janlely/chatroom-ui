@@ -72,6 +72,10 @@ const ChatPC: React.FC<ChatProps> = (props) => {
                 ))}
             </div>
             <div className="pc-chat-place">
+                <div className="mb-chat-header">
+                    <div onClick={() => window.location.href = "/goto"}>切换房间</div>
+                    <div>{props.roomId}</div>
+                </div>
                 <div className="pc-chat-body" ref={props.msgDivRef}>
                     {props.messages.map(msg => (
                         <div className="pc-message-container" key={msg.message.messageId}>
