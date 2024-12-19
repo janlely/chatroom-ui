@@ -88,6 +88,9 @@ const ChatPC: React.FC<ChatProps> = (props) => {
                                             </div>
                                         )
                                     )}
+                                    <div>
+                                        {msg.message.type == MessageType.TEXT ? <TxtMessage message={msg} /> : <ImgMessage message={msg}/>}
+                                    </div>
                                 </div>
                             ) : (
                                 <div className="pc-message-box-left">
